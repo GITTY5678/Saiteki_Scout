@@ -1,5 +1,5 @@
 import ast
-from sympy import symbols, log
+from sympy import symbols, log,simplify
 
 
 class Time_Complexity:
@@ -36,10 +36,10 @@ class Time_Complexity:
         "ExceptHandler": ["body"],
 
         # Data Structures
-        "List": ["elts"],
-        "Tuple": ["elts"],
-        "Set": ["elts"],
-        "Dict": ["keys", "values"],
+        #"List": ["elts"],
+        #"Tuple": ["elts"],
+        #"Set": ["elts"],
+        #"Dict": ["keys", "values"],
 
         # Access Operations
         "Subscript": ["value", "slice"],
@@ -217,6 +217,12 @@ class Time_Complexity:
     
     def visit(self, node):
         node_name = type(node).__name__
+        if (
+            node_name == "Call"
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "range"
+        ):
+            return
         pushed = False
 
         if node_name in self.TIME_CONTRIBUTORS:
@@ -272,21 +278,62 @@ class Time_Complexity:
                 print(item)
 
             print("=" * 60)
+    def reduce_tree(self, node):
+    
+        current_complexity = node["info"]["complexity"]
 
+        if not node["children"]:
+            return current_complexity
+
+        children_complexity = 0
+
+        for child in node["children"]:
+            children_complexity += self.reduce_tree(child)
+
+        return current_complexity * children_complexity
+    
+    def reduce_forest(self):
+    
+        total_complexity = 0
+
+        for root in self.result_tree:
+            total_complexity += self.reduce_tree(root)
+
+        return total_complexity
+    
     def analyzer(self):
+    
         self.tree = ast.parse(self.code)
+
         self.visit(self.tree)
+
+        print("\nRESULT TREE")
+        print(self.result_tree)
+
+        basic_expression = self.reduce_forest()
+
+        simplified_expression = simplify(
+            basic_expression
+        )
+
+        final_complexity = f"O({simplified_expression})"
+
+        print("\nBASIC EXPRESSION")
+        print(basic_expression)
+
+        print("\nSIMPLIFIED EXPRESSION")
+        print(simplified_expression)
+
+        print("\nFINAL COMPLEXITY")
+        print(final_complexity)
 
 
 if __name__ == "__main__":
 
     code = """
-a = sorted(arr)
-
 for i in range(n):
-    if i > 5:
-        x = [j for j in range(n)]
-        print(x)
+    for j in range(n):
+        print(i, j)
 """
 
     tc = Time_Complexity(code)
