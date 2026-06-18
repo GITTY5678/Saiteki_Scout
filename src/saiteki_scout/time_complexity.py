@@ -118,7 +118,13 @@ class Time_Complexity:
     def __init__(self, code):
         self.code = code
         self.tree = None
+
         self.node_stack = []
+        self.complexity_stack = []
+
+        self.result_tree = []
+        self.tree_stack = []
+
         self.n, self.m, self.k = symbols("n m k")
 
     def get_contributor_info(self, node):
@@ -222,6 +228,19 @@ class Time_Complexity:
                 self.resolve_complexity(contributor_info)
             )
 
+            tree_node = {
+                "info": contributor_info,
+                "children": []
+            }
+
+            if self.tree_stack:
+                parent = self.tree_stack[-1]
+                parent["children"].append(tree_node)
+            else:
+                self.result_tree.append(tree_node)
+
+            self.tree_stack.append(tree_node)
+
             self.node_stack.append(contributor_info)
 
             print("\nENTER")
@@ -237,10 +256,16 @@ class Time_Complexity:
             self.visit(child)
 
         if pushed:
+
+            finished_tree_node = self.tree_stack.pop()
+
             popped = self.node_stack.pop()
 
             print("\nEXIT")
             print(popped)
+
+            print("\nTREE NODE")
+            print(finished_tree_node)
 
             print("\nSTACK")
             for item in self.node_stack:
