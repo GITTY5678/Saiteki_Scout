@@ -149,6 +149,79 @@ class Time_Complexity:
     "recursive_calls": [],
     "recurrence": None
 }
+        self.binary_search_info = {
+    "detected": False
+}   
+        
+    def detect_binary_search(self, node):
+    
+        if not isinstance(node, ast.While):
+            return
+
+        found_mid = False
+
+        found_left_update = False
+
+        found_right_update = False
+
+        for child in ast.walk(node):
+
+            # mid = (...)
+            if isinstance(child, ast.Assign):
+
+                for target in child.targets:
+
+                    if (
+                        isinstance(target, ast.Name)
+                        and target.id == "mid"
+                    ):
+                        found_mid = True
+
+            # left = mid + 1
+            if isinstance(child, ast.Assign):
+
+                if (
+                    len(child.targets) == 1
+                    and isinstance(
+                        child.targets[0],
+                        ast.Name
+                    )
+                ):
+
+                    target_name = (
+                        child.targets[0].id
+                    )
+
+                    try:
+
+                        value = ast.unparse(
+                            child.value
+                        )
+
+                        if (
+                            target_name == "left"
+                            and "mid" in value
+                        ):
+                            found_left_update = True
+
+                        if (
+                            target_name == "right"
+                            and "mid" in value
+                        ):
+                            found_right_update = True
+
+                    except:
+                        pass
+
+        if (
+            found_mid
+            and found_left_update
+            and found_right_update
+        ):
+
+            self.binary_search_info[
+                "detected"
+            ] = True
     def normalize_recurrence(self, recurrence):
     
         recurrence = recurrence.replace(" ", "")
@@ -500,13 +573,30 @@ class Time_Complexity:
     
     def analyzer(self):
     
+        # -------------------------
+        # PARSE
+        # -------------------------
         self.tree = ast.parse(self.code)
+
+        # -------------------------
+        # DETECT RECURSION
+        # -------------------------
         self.detect_recursion(self.tree)
+
+        # -------------------------
+        # DETECT BINARY SEARCH
+        # -------------------------
+        for node in ast.walk(self.tree):
+            self.detect_binary_search(node)
+
+        # -------------------------
+        # BUILD CONTRIBUTION TREE
+        # -------------------------
         self.visit(self.tree)
 
-        #print("\nRESULT TREE")
-        #print(self.result_tree)
-
+        # -------------------------
+        # AST COMPLEXITY
+        # -------------------------
         basic_expression = self.reduce_forest()
 
         simplified_expression = simplify(
@@ -517,8 +607,39 @@ class Time_Complexity:
             simplified_expression
         )
 
-        final_complexity = f"O({dominant_term})"
+        ast_complexity = f"O({dominant_term})"
 
+        # -------------------------
+        # RECURSION COMPLEXITY
+        # -------------------------
+        recurrence = self.build_recurrence()
+
+        self.recursion_info["recurrence"] = recurrence
+
+        recursive_complexity = None
+
+        if self.recursion_info["detected"]:
+
+            recursive_complexity = (
+                self.solve_recurrence()
+            )
+
+        # -------------------------
+        # FINAL COMPLEXITY DECISION
+        # -------------------------
+        final_complexity = ast_complexity
+
+        if self.binary_search_info["detected"]:
+
+            final_complexity = "O(log(n))"
+
+        elif recursive_complexity:
+
+            final_complexity = recursive_complexity
+
+        # -------------------------
+        # CONTRIBUTIONS
+        # -------------------------
         print("\nCONTRIBUTIONS")
         print("-" * 30)
 
@@ -530,6 +651,9 @@ class Time_Complexity:
                 f"{idx}. {node} -> {comp}"
             )
 
+        # -------------------------
+        # AST REPORT
+        # -------------------------
         print("\nBASIC EXPRESSION")
         print("-" * 30)
         print(basic_expression)
@@ -542,78 +666,79 @@ class Time_Complexity:
         print("-" * 30)
         print(dominant_term)
 
-        coef, term = dominant_term.as_coeff_Mul()
-        if self.recursion_info["detected"]:
-    
-            recursive_complexity = self.solve_recurrence()
-
-            print(
-                f"O({recursive_complexity[2:-1]})"
-            )
-
-        else:
-
-            print(
-                f"O({final_complexity})"
-            )
-        
-        print("\nFINAL COMPLEXITY")
+        # -------------------------
+        # BINARY SEARCH REPORT
+        # -------------------------
+        print("\nBINARY SEARCH REPORT")
         print("-" * 30)
-        print(f"O({final_complexity})")
+
+        print(
+            f"Detected : "
+            f"{self.binary_search_info['detected']}"
+        )
+
+        # -------------------------
+        # RECURSION REPORT
+        # -------------------------
         print("\nRECURSION REPORT")
         print("-" * 30)
-        recurrence = self.build_recurrence()
 
-        self.recursion_info["recurrence"] = recurrence
         print(
-            f"Detected : {self.recursion_info['detected']}"
+            f"Detected : "
+            f"{self.recursion_info['detected']}"
         )
 
         if self.recursion_info["detected"]:
 
             print(
-                f"Function : {self.recursion_info['function']}"
+                f"Function : "
+                f"{self.recursion_info['function']}"
             )
 
             print(
-                f"Recursive Calls : {self.recursion_info['calls']}"
-            )
-        recursion_type = self.classify_recursion()
-        if self.recursion_info["detected"]:
-    
-            print(
-                f"Function : {self.recursion_info['function']}"
+                f"Recursive Calls : "
+                f"{self.recursion_info['calls']}"
             )
 
             print(
-                f"Recursive Calls : {self.recursion_info['calls']}"
+                f"Type : "
+                f"{self.classify_recursion()}"
             )
 
-            print(
-                f"Type : {recursion_type}"
-            )
-        if recurrence:
-    
             print("\nRECURRENCE")
             print("-" * 30)
-
             print(recurrence)
-        recursive_complexity = self.solve_recurrence()
-        if recursive_complexity:
-    
+
             print("\nRECURSIVE COMPLEXITY")
             print("-" * 30)
-
             print(recursive_complexity)
+
+        # -------------------------
+        # FINAL RESULT
+        # -------------------------
+        print("\nFINAL COMPLEXITY")
+        print("-" * 30)
+        print(final_complexity)
 if __name__ == "__main__":
 
     code = """
-def fib(n):
+def binary_search(arr,target):
     
-    if n <= 1:
-        return n
+    left = 0
+    right = len(arr)-1
 
-    return fib(n-1) + fib(n-2)
+    while left <= right:
+
+        mid = (left+right)//2
+
+        if arr[mid] == target:
+            return True
+
+        elif arr[mid] < target:
+            left = mid+1
+
+        else:
+            right = mid-1
 """
 
     tc = Time_Complexity(code)
