@@ -1,5 +1,5 @@
 import ast
-from sympy import symbols, log, simplify, Add, Mul
+from sympy import symbols, log, simplify, Add, Mul,sympify
 
 
 class Time_Complexity:
@@ -126,7 +126,31 @@ class Time_Complexity:
         self.tree_stack = []
 
         self.n, self.m, self.k = symbols("n m k")
+        self.contributions = []
 
+    def get_dominant_term(self, expr):
+    
+        expr = expr.expand()
+
+        if not isinstance(expr, Add):
+            return expr
+
+        terms = expr.as_ordered_terms()
+
+        def rank(term):
+
+            powers = term.as_powers_dict()
+
+            n_power = powers.get(self.n, 0)
+
+            has_log = log(self.n) in powers
+
+            return (
+                n_power,
+                1 if has_log else 0
+            )
+
+        return max(terms, key=rank)
     def get_contributor_info(self, node):
         node_name = type(node).__name__
 
@@ -153,9 +177,48 @@ class Time_Complexity:
                 info[field] = str(value)
 
         return info
+
     def resolve_iter(self, value):
-    
-        if "range(" in value:
+
+        SIZE_MAP = {
+            "arr": self.n,
+            "nums": self.n,
+            "data": self.n,
+            "lst": self.n
+        }
+
+        value = value.strip()
+
+        # range(...)
+        if value.startswith("range("):
+
+            inside = value[6:-1].strip()
+
+            try:
+
+                expr = sympify(
+                    inside,
+                    locals={
+                        "n": self.n,
+                        "m": self.m,
+                        "k": self.k
+                    }
+                )
+
+                if expr.is_number:
+                    return 1
+
+                return expr
+
+            except Exception:
+                return 1
+
+        # known iterable variables
+        if value in SIZE_MAP:
+            return SIZE_MAP[value]
+
+        # unknown iterable variables
+        if value.isidentifier():
             return self.n
 
         return 1
@@ -233,6 +296,12 @@ class Time_Complexity:
             contributor_info["complexity"] = (
                 self.resolve_complexity(contributor_info)
             )
+            self.contributions.append(
+            (
+                contributor_info["node"],
+                contributor_info["complexity"]
+            )
+)
 
             tree_node = {
                 "info": contributor_info,
@@ -249,14 +318,7 @@ class Time_Complexity:
 
             self.node_stack.append(contributor_info)
 
-            print("\nENTER")
-            print(contributor_info)
-
-            print("\nSTACK")
-            for item in self.node_stack:
-                print(item)
-
-            print("-" * 60)
+            
 
         for child in ast.iter_child_nodes(node):
             self.visit(child)
@@ -266,18 +328,6 @@ class Time_Complexity:
             finished_tree_node = self.tree_stack.pop()
 
             popped = self.node_stack.pop()
-
-            print("\nEXIT")
-            print(popped)
-
-            print("\nTREE NODE")
-            print(finished_tree_node)
-
-            print("\nSTACK")
-            for item in self.node_stack:
-                print(item)
-
-            print("=" * 60)
     def reduce_tree(self, node):
     
         current_complexity = node["info"]["complexity"]
@@ -319,8 +369,8 @@ class Time_Complexity:
 
         self.visit(self.tree)
 
-        print("\nRESULT TREE")
-        print(self.result_tree)
+        #print("\nRESULT TREE")
+        #print(self.result_tree)
 
         basic_expression = self.reduce_forest()
 
@@ -328,16 +378,38 @@ class Time_Complexity:
             basic_expression
         )
 
-        final_complexity = f"O({simplified_expression})"
+        dominant_term = self.get_dominant_term(
+            simplified_expression
+        )
+
+        final_complexity = f"O({dominant_term})"
+
+        print("\nCONTRIBUTIONS")
+        print("-" * 30)
+
+        for idx, (node, comp) in enumerate(
+            self.contributions,
+            start=1
+        ):
+            print(
+                f"{idx}. {node} -> {comp}"
+            )
 
         print("\nBASIC EXPRESSION")
+        print("-" * 30)
         print(basic_expression)
 
         print("\nSIMPLIFIED EXPRESSION")
+        print("-" * 30)
         print(simplified_expression)
 
+        print("\nDOMINANT TERM")
+        print("-" * 30)
+        print(dominant_term)
+
         print("\nFINAL COMPLEXITY")
-        print(final_complexity)
+        print("-" * 30)
+        print(f"O({dominant_term})")
 
 
 if __name__ == "__main__":
