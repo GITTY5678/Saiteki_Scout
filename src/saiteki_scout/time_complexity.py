@@ -14,10 +14,10 @@ class Time_Complexity:
         "Call": ["func", "args"],
 
         # Comprehensions
-        "ListComp": ["generators"],
-        "SetComp": ["generators"],
-        "DictComp": ["generators"],
-        "GeneratorExp": ["generators"],
+        "ListComp": [],
+        "SetComp": [],
+        "DictComp": [],
+        "GeneratorExp": [],
         "comprehension": ["iter"],
 
         # Functions
