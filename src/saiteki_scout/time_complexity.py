@@ -68,7 +68,20 @@ class Time_Complexity:
         # Classes
         "ClassDef": ["body"]
     }
+    RECURRENCE_KNOWLEDGE_BASE = {
 
+    "T(n-1)+O(1)": "O(n)",
+
+    "T(n-1)+O(n)": "O(n**2)",
+
+    "T(n-1)+T(n-2)+O(1)": "O(2**n)",
+
+    "2T(n/2)+O(n)": "O(n*log(n))",
+
+    "2T(n/2)+O(1)": "O(n)",
+
+    "T(n/2)+O(1)": "O(log(n))"
+}
     COMPLEXITY_KNOWLEDGE_BASE = {
     "len": "O(1)",
     "max": "O(n)",
@@ -127,7 +140,59 @@ class Time_Complexity:
 
         self.n, self.m, self.k = symbols("n m k")
         self.contributions = []
+        self.current_function = None
 
+        self.recursion_info = {
+    "detected": False,
+    "function": None,
+    "calls": 0,
+    "recursive_calls": [],
+    "recurrence": None
+}
+    def normalize_recurrence(self, recurrence):
+    
+        recurrence = recurrence.replace(" ", "")
+
+        return recurrence
+    def solve_recurrence(self):
+    
+        recurrence = self.recursion_info["recurrence"]
+
+        if recurrence is None:
+            return None
+
+        recurrence = self.normalize_recurrence(
+            recurrence
+        )
+
+        return self.RECURRENCE_KNOWLEDGE_BASE.get(
+            recurrence,
+            "Unknown"
+        )
+    def build_recurrence(self):
+    
+        if not self.recursion_info["detected"]:
+            return None
+
+        calls = self.recursion_info["recursive_calls"]
+
+        recurrence_parts = []
+
+        for call in calls:
+
+            arg = call[0]
+
+            recurrence_parts.append(
+                f"T({arg})"
+            )
+
+        recurrence = " + ".join(
+            recurrence_parts
+        )
+
+        recurrence += " + O(1)"
+
+        return recurrence
     def get_dominant_term(self, expr):
     
         expr = expr.expand()
@@ -151,6 +216,76 @@ class Time_Complexity:
             )
 
         return max(terms, key=rank)
+    def detect_recursion(self, node):
+        if isinstance(node, ast.FunctionDef):
+    
+            previous_function = self.current_function
+
+            self.current_function = node.name
+
+            for child in ast.iter_child_nodes(node):
+                self.detect_recursion(child)
+
+            self.current_function = previous_function
+
+            return
+        # Entering a function
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and self.current_function is not None
+            and node.func.id == self.current_function
+        ):
+
+            self.recursion_info["detected"] = True
+
+            self.recursion_info["function"] = self.current_function
+
+            self.recursion_info["calls"] += 1
+
+            args = []
+
+            for arg in node.args:
+                args.append(
+                    ast.unparse(arg)
+                )
+
+            self.recursion_info["recursive_calls"].append(
+                args
+            )
+            return
+
+        # Function call
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and self.current_function is not None
+            and node.func.id == self.current_function
+        ):
+
+            self.recursion_info["detected"] = True
+
+            self.recursion_info["function"] = self.current_function
+
+            self.recursion_info["calls"] += 1
+
+        for child in ast.iter_child_nodes(node):
+            self.detect_recursion(child)
+    
+    def classify_recursion(self):
+    
+        calls = self.recursion_info["calls"]
+
+        if calls == 0:
+            return None
+
+        if calls == 1:
+            return "Linear Recursion"
+
+        if calls == 2:
+            return "Binary Recursion"
+
+        return "Multiple Recursion"
     def get_contributor_info(self, node):
         node_name = type(node).__name__
 
@@ -366,7 +501,7 @@ class Time_Complexity:
     def analyzer(self):
     
         self.tree = ast.parse(self.code)
-
+        self.detect_recursion(self.tree)
         self.visit(self.tree)
 
         #print("\nRESULT TREE")
@@ -407,17 +542,78 @@ class Time_Complexity:
         print("-" * 30)
         print(dominant_term)
 
+        coef, term = dominant_term.as_coeff_Mul()
+        if self.recursion_info["detected"]:
+    
+            recursive_complexity = self.solve_recurrence()
+
+            print(
+                f"O({recursive_complexity[2:-1]})"
+            )
+
+        else:
+
+            print(
+                f"O({final_complexity})"
+            )
+        
         print("\nFINAL COMPLEXITY")
         print("-" * 30)
-        print(f"O({dominant_term})")
+        print(f"O({final_complexity})")
+        print("\nRECURSION REPORT")
+        print("-" * 30)
+        recurrence = self.build_recurrence()
 
+        self.recursion_info["recurrence"] = recurrence
+        print(
+            f"Detected : {self.recursion_info['detected']}"
+        )
 
+        if self.recursion_info["detected"]:
+
+            print(
+                f"Function : {self.recursion_info['function']}"
+            )
+
+            print(
+                f"Recursive Calls : {self.recursion_info['calls']}"
+            )
+        recursion_type = self.classify_recursion()
+        if self.recursion_info["detected"]:
+    
+            print(
+                f"Function : {self.recursion_info['function']}"
+            )
+
+            print(
+                f"Recursive Calls : {self.recursion_info['calls']}"
+            )
+
+            print(
+                f"Type : {recursion_type}"
+            )
+        if recurrence:
+    
+            print("\nRECURRENCE")
+            print("-" * 30)
+
+            print(recurrence)
+        recursive_complexity = self.solve_recurrence()
+        if recursive_complexity:
+    
+            print("\nRECURSIVE COMPLEXITY")
+            print("-" * 30)
+
+            print(recursive_complexity)
 if __name__ == "__main__":
 
     code = """
-for i in range(n):
-    for j in range(n):
-        print(i, j)
+def fib(n):
+    
+    if n <= 1:
+        return n
+
+    return fib(n-1) + fib(n-2)
 """
 
     tc = Time_Complexity(code)
