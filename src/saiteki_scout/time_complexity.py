@@ -1,5 +1,5 @@
 import ast
-from sympy import symbols, log,simplify
+from sympy import symbols, log, simplify, Add, Mul
 
 
 class Time_Complexity:
@@ -285,21 +285,33 @@ class Time_Complexity:
         if not node["children"]:
             return current_complexity
 
-        children_complexity = 0
+        children = [
+            self.reduce_tree(child)
+            for child in node["children"]
+        ]
 
-        for child in node["children"]:
-            children_complexity += self.reduce_tree(child)
+        children_complexity = Add(
+            *children,
+            evaluate=False
+        )
 
-        return current_complexity * children_complexity
+        return Mul(
+            current_complexity,
+            children_complexity,
+            evaluate=False
+        )
     
     def reduce_forest(self):
     
-        total_complexity = 0
+        expressions = [
+            self.reduce_tree(root)
+            for root in self.result_tree
+        ]
 
-        for root in self.result_tree:
-            total_complexity += self.reduce_tree(root)
-
-        return total_complexity
+        return Add(
+            *expressions,
+            evaluate=False
+        )
     
     def analyzer(self):
     

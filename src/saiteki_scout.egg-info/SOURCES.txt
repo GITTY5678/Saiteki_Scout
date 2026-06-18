@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+src/saiteki_scout/__init__.py
+src/saiteki_scout/space_complexity.py
+src/saiteki_scout/time_complexity.py
+src/saiteki_scout.egg-info/PKG-INFO
+src/saiteki_scout.egg-info/SOURCES.txt
+src/saiteki_scout.egg-info/dependency_links.txt
+src/saiteki_scout.egg-info/top_level.txt
