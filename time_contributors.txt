@@ -1,0 +1,65 @@
+TIME_CONTRIBUTORS = {
+
+    # Loops
+    "For": ["iter"],
+    "AsyncFor": ["iter"],
+    "While": ["test", "body"],
+
+    # Function Calls
+    "Call": ["func", "args"],
+
+    # Comprehensions
+    "ListComp": ["generators"],
+    "SetComp": ["generators"],
+    "DictComp": ["generators"],
+    "GeneratorExp": ["generators"],
+    "comprehension": ["iter"],
+
+    # Functions
+    "FunctionDef": ["body"],
+    "AsyncFunctionDef": ["body"],
+    "Lambda": ["body"],
+
+    # Conditional Structures
+    "If": ["test", "body", "orelse"],
+    "IfExp": ["test", "body", "orelse"],
+    "Match": ["cases"],
+
+    # Exception Handling
+    "Try": ["body", "handlers", "finalbody"],
+    "TryStar": ["body", "handlers", "finalbody"],
+    "ExceptHandler": ["body"],
+
+    # Data Structures
+    "List": ["elts"],
+    "Tuple": ["elts"],
+    "Set": ["elts"],
+    "Dict": ["keys", "values"],
+
+    # Access Operations
+    "Subscript": ["value", "slice"],
+    "Slice": ["lower", "upper", "step"],
+
+    # Expressions
+    "BinOp": ["left", "right"],
+    "UnaryOp": ["operand"],
+    "BoolOp": ["values"],
+    "Compare": ["left", "comparators"],
+
+    # Assignment
+    "Assign": ["value"],
+    "AnnAssign": ["value"],
+    "AugAssign": ["value"],
+
+    # Return/Yield
+    "Return": ["value"],
+    "Yield": ["value"],
+    "YieldFrom": ["value"],
+
+    # Context Managers
+    "With": ["items", "body"],
+    "AsyncWith": ["items", "body"],
+
+    # Classes
+    "ClassDef": ["body"]
+}

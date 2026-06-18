@@ -1,0 +1,81 @@
+COMPLEXITY_KNOWLEDGE_BASE = {
+
+    # Built-in Functions
+    "len": "O(1)",
+    "max": "O(n)",
+    "min": "O(n)",
+    "sum": "O(n)",
+    "sorted": "O(n log n)",
+
+    # List Methods
+    "append": "O(1)",
+    "clear": "O(n)",
+    "copy": "O(n)",
+    "count": "O(n)",
+    "extend": "O(k)",
+    "index": "O(n)",
+    "insert": "O(n)",
+    "pop": "O(1)",
+    "remove": "O(n)",
+    "reverse": "O(n)",
+    "sort": "O(n log n)",
+
+    # Dictionary Methods
+    "fromkeys": "O(n)",
+    "get": "O(1)",
+    "items": "O(n)",
+    "keys": "O(n)",
+    "popitem": "O(1)",
+    "setdefault": "O(1)",
+    "update": "O(m)",
+    "values": "O(n)",
+
+    # Set Methods
+    "add": "O(1)",
+    "difference": "O(n)",
+    "difference_update": "O(n)",
+    "discard": "O(1)",
+    "intersection": "O(min(n,m))",
+    "intersection_update": "O(min(n,m))",
+    "isdisjoint": "O(min(n,m))",
+    "issubset": "O(n)",
+    "issuperset": "O(m)",
+    "symmetric_difference": "O(n+m)",
+    "symmetric_difference_update": "O(n+m)",
+    "union": "O(n+m)",
+
+    # Tuple Methods
+    "count": "O(n)",
+    "index": "O(n)",
+
+    # String Methods
+    "capitalize": "O(n)",
+    "casefold": "O(n)",
+    "center": "O(n)",
+    "encode": "O(n)",
+    "endswith": "O(m)",
+    "find": "O(n)",
+    "format": "O(n)",
+    "isalnum": "O(n)",
+    "isalpha": "O(n)",
+    "isdigit": "O(n)",
+    "islower": "O(n)",
+    "isspace": "O(n)",
+    "istitle": "O(n)",
+    "isupper": "O(n)",
+    "join": "O(total_chars)",
+    "lower": "O(n)",
+    "lstrip": "O(n)",
+    "replace": "O(n)",
+    "rfind": "O(n)",
+    "rindex": "O(n)",
+    "rstrip": "O(n)",
+    "split": "O(n)",
+    "splitlines": "O(n)",
+    "startswith": "O(m)",
+    "strip": "O(n)",
+    "swapcase": "O(n)",
+    "title": "O(n)",
+    "upper": "O(n)",
+    "zfill": "O(n)"
+}
