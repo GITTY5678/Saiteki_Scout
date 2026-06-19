@@ -220,6 +220,20 @@ class Time_Complexity:
     "func": "resolve_func",
     "generators": "resolve_generators"
 }
+    COMPLEXITY_GRAPHS = {
+
+    "O(1)": lambda n: 1,
+
+    "O(log(n))": lambda n: math.log2(n),
+
+    "O(n)": lambda n: n,
+
+    "O(n*log(n))": lambda n: n * math.log2(n),
+
+    "O(n**2)": lambda n: n**2,
+
+    "O(2**n)": lambda n: 2**n
+}
     def __init__(self, code):
         self.code = code
         self.tree = None
@@ -1337,6 +1351,8 @@ class Time_Complexity:
         print("\nFINAL COMPLEXITY")
         print("-" * 30)
         print(final_complexity)
+        
+        self.final_complexity=final_complexity
     def get_detected_algorithm(self):
     
         if self.binary_search_info["detected"]:
@@ -1404,6 +1420,59 @@ class Time_Complexity:
         print(
             f"Worst Case : {info['worst']}"
         )
+    def graph(self):
+    
+        import math
+        import matplotlib.pyplot as plt
+
+        complexity = self.final_complexity
+
+        graph_map = {
+
+            "O(1)": lambda n: 1,
+
+            "O(log(n))": lambda n: math.log2(n),
+
+            "O(n)": lambda n: n,
+
+            "O(n*log(n))":
+                lambda n: n * math.log2(n),
+
+            "O(n**2)":
+                lambda n: n**2,
+
+            "O(2**n)":
+                lambda n: 2**n
+        }
+
+        if complexity not in graph_map:
+
+            print(
+                "Graph unavailable "
+                "for this complexity."
+            )
+
+            return
+
+        x = [1,2,5,10,20,50,100]
+
+        y = [
+            graph_map[complexity](n)
+            for n in x
+        ]
+
+        plt.plot(x, y)
+
+        plt.title(
+            f"Growth of {complexity}"
+        )
+
+        plt.xlabel("Input Size (n)")
+        plt.ylabel("Operations")
+
+        plt.grid(True)
+
+        plt.show()
 if __name__ == "__main__":
 
     code = """
@@ -1414,3 +1483,4 @@ print(len(arr))
 
     tc = Time_Complexity(code)
     tc.analyzer()
+    tc.classifier()
