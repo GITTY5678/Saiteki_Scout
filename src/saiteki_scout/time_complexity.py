@@ -68,6 +68,98 @@ class Time_Complexity:
         # Classes
         "ClassDef": ["body"]
     }
+    CLASSIFICATION_KNOWLEDGE_BASE = {
+
+    "Binary Search": {
+        "best": "O(1)",
+        "average": "O(log n)",
+        "worst": "O(log n)"
+    },
+
+    "Quick Sort": {
+        "best": "O(n log n)",
+        "average": "O(n log n)",
+        "worst": "O(n²)"
+    },
+
+    "Merge Sort": {
+        "best": "O(n log n)",
+        "average": "O(n log n)",
+        "worst": "O(n log n)"
+    },
+
+    "Heap": {
+        "best": "O(log n)",
+        "average": "O(log n)",
+        "worst": "O(log n)"
+    },
+
+    "DFS": {
+        "best": "O(V+E)",
+        "average": "O(V+E)",
+        "worst": "O(V+E)"
+    },
+
+    "BFS": {
+        "best": "O(V+E)",
+        "average": "O(V+E)",
+        "worst": "O(V+E)"
+    },
+
+    "Sliding Window": {
+        "best": "O(n)",
+        "average": "O(n)",
+        "worst": "O(n)"
+    },
+
+    "Two Pointers": {
+        "best": "O(n)",
+        "average": "O(n)",
+        "worst": "O(n)"
+    },
+
+    "Dynamic Programming": {
+        "best": "O(n)",
+        "average": "O(n)",
+        "worst": "O(n)"
+    }
+}
+    NODE_DISPLAY_NAMES = {
+
+    "For": "For Loop",
+
+    "While": "While Loop",
+
+    "Call": "Function Call",
+
+    "Assign": "Assignment",
+
+    "AugAssign": "Assignment",
+
+    "Compare": "Comparison",
+
+    "BinOp": "Arithmetic Operation",
+
+    "Subscript": "Array/List Access",
+
+    "FunctionDef": "Function Definition",
+
+    "Return": "Return Statement",
+
+    "ListComp": "List Comprehension",
+
+    "DictComp": "Dictionary Comprehension",
+
+    "SetComp": "Set Comprehension",
+
+    "GeneratorExp": "Generator Expression",
+
+    "If": "Conditional Statement",
+
+    "Lambda": "Lambda Function",
+
+    "Yield": "Yield Statement"
+}
     RECURRENCE_KNOWLEDGE_BASE = {
 
     "T(n-1)+O(1)": "O(n)",
@@ -886,10 +978,7 @@ class Time_Complexity:
                 self.resolve_complexity(contributor_info)
             )
             self.contributions.append(
-            (
-                contributor_info["node"],
-                contributor_info["complexity"]
-            )
+    contributor_info.copy()
 )
 
             tree_node = {
@@ -1076,13 +1165,42 @@ class Time_Complexity:
         print("\nCONTRIBUTIONS")
         print("-" * 30)
 
-        for idx, (node, comp) in enumerate(
+        for idx, item in enumerate(
             self.contributions,
             start=1
         ):
-            print(
-                f"{idx}. {node} -> {comp}"
+
+            node = item["node"]
+
+            display_name = (
+                self.NODE_DISPLAY_NAMES.get(
+                    node,
+                    node
+                )
             )
+
+            complexity = item["complexity"]
+
+            if node == "Call":
+
+                func_name = item.get(
+                    "func",
+                    "unknown"
+                )
+
+                print(
+                    f"{idx}. Function Call: "
+                    f"{func_name}() "
+                    f"-> O({complexity})"
+                )
+
+            else:
+
+                print(
+                    f"{idx}. "
+                    f"{display_name} "
+                    f"-> {complexity}"
+                )
 
         # -------------------------
         # AST REPORT
@@ -1219,18 +1337,79 @@ class Time_Complexity:
         print("\nFINAL COMPLEXITY")
         print("-" * 30)
         print(final_complexity)
+    def get_detected_algorithm(self):
+    
+        if self.binary_search_info["detected"]:
+            return "Binary Search"
+
+        if self.quick_sort_info["detected"]:
+            return "Quick Sort"
+
+        if self.merge_sort_info["detected"]:
+            return "Merge Sort"
+
+        if self.heap_info["detected"]:
+            return "Heap"
+
+        if self.bfs_info["detected"]:
+            return "BFS"
+
+        if self.dfs_info["detected"]:
+            return "DFS"
+
+        if self.sliding_window_info["detected"]:
+            return "Sliding Window"
+
+        if self.two_pointer_info["detected"]:
+            return "Two Pointers"
+
+        if self.dp_info["detected"]:
+            return "Dynamic Programming"
+
+        return None
+    def classifier(self):
+    
+        algorithm = self.get_detected_algorithm()
+
+        if algorithm is None:
+
+            print("\nCLASSIFICATION")
+            print("-" * 30)
+
+            print(
+                "No algorithm classification available."
+            )
+
+            return
+
+        info = self.CLASSIFICATION_KNOWLEDGE_BASE[
+            algorithm
+        ]
+
+        print("\nCLASSIFICATION")
+        print("-" * 30)
+
+        print(
+            f"Algorithm : {algorithm}"
+        )
+
+        print(
+            f"Best Case : {info['best']}"
+        )
+
+        print(
+            f"Average Case : {info['average']}"
+        )
+
+        print(
+            f"Worst Case : {info['worst']}"
+        )
 if __name__ == "__main__":
 
     code = """
-def dfs(node):
-    
-    visited.add(node)
+arr = sorted(arr)
 
-    for neighbor in graph[node]:
-
-        if neighbor not in visited:
-
-            dfs(neighbor)
+print(len(arr))
 """
 
     tc = Time_Complexity(code)
