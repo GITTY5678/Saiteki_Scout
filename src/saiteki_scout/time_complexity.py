@@ -1100,125 +1100,118 @@ class Time_Complexity:
         print(dominant_term)
 
         # -------------------------
-        # BINARY SEARCH REPORT
+        # DETECTED PATTERNS
         # -------------------------
-        print("\nBINARY SEARCH REPORT")
+        print("\nDETECTED PATTERNS")
         print("-" * 30)
 
-        print(
-            f"Detected : "
-            f"{self.binary_search_info['detected']}"
-        )
+        found_pattern = False
 
-        # -------------------------
-        # RECURSION REPORT
-        # -------------------------
-        print("\nRECURSION REPORT")
-        print("-" * 30)
+        if self.binary_search_info["detected"]:
 
-        print(
-            f"Detected : "
-            f"{self.recursion_info['detected']}"
-        )
-        print("\nTWO POINTER REPORT")
-        print("-" * 30)
+            found_pattern = True
 
-        print(
-            f"Detected : "
-            f"{self.two_pointer_info['detected']}"
-        )
-        print("\nSLIDING WINDOW REPORT")
-        print("-" * 30)
+            print("Binary Search")
 
-        print(
-            f"Detected : "
-            f"{self.sliding_window_info['detected']}"
-        )
-        print("\nHEAP REPORT")
-        print("-" * 30)
+        if self.two_pointer_info["detected"]:
 
-        print(
-            f"Detected : "
-            f"{self.heap_info['detected']}"
-        )
-        print("\nDFS REPORT")
-        print("-" * 30)
+            found_pattern = True
 
-        print(
-            f"Detected : "
-            f"{self.dfs_info['detected']}"
-        )
+            print("Two Pointers")
 
-        print("\nBFS REPORT")
-        print("-" * 30)
+        if self.sliding_window_info["detected"]:
 
-        print(
-            f"Detected : "
-            f"{self.bfs_info['detected']}"
-)
-        print("\nMERGE SORT REPORT")
-        print("-" * 30)
+            found_pattern = True
 
-        print(
-            f"Detected : "
-            f"{self.merge_sort_info['detected']}"
-        )
-        print("\nQUICK SORT REPORT")
-        print("-" * 30)
+            print("Sliding Window")
 
-        print(
-            f"Detected : "
-            f"{self.quick_sort_info['detected']}"
-)
-        print("\nDYNAMIC PROGRAMMING REPORT")
-        print("-" * 30)
-
-        print(
-            f"Detected : "
-            f"{self.dp_info['detected']}"
-        )
-
-        if self.dp_info["detected"]:
-
-            print(
-                f"Type : "
-                f"{self.dp_info['type']}"
-            )
         if self.heap_info["detected"]:
 
-            print("\nOPERATIONS")
+            found_pattern = True
+
+            print("Heap")
 
             for op, complexity in (
                 self.heap_info["operations"]
             ):
 
                 print(
-                    f"{op} -> {complexity}"
+                    f"  {op} -> {complexity}"
                 )
-        if self.recursion_info["detected"]:
+
+        if self.dfs_info["detected"]:
+
+            found_pattern = True
+
+            print("DFS")
+
+        if self.bfs_info["detected"]:
+
+            found_pattern = True
+
+            print("BFS")
+
+        if self.merge_sort_info["detected"]:
+
+            found_pattern = True
+
+            print("Merge Sort")
+
+        if self.quick_sort_info["detected"]:
+
+            found_pattern = True
+
+            print("Quick Sort")
+
+        if self.dp_info["detected"]:
+
+            found_pattern = True
 
             print(
-                f"Function : "
+                f"Dynamic Programming "
+                f"({self.dp_info['type']})"
+            )
+
+        if self.recursion_info["detected"]:
+
+            found_pattern = True
+
+            print("Recursion")
+
+            print(
+                f"  Function : "
                 f"{self.recursion_info['function']}"
             )
 
             print(
-                f"Recursive Calls : "
+                f"  Calls : "
                 f"{self.recursion_info['calls']}"
             )
 
             print(
-                f"Type : "
+                f"  Type : "
                 f"{self.classify_recursion()}"
             )
 
-            print("\nRECURRENCE")
-            print("-" * 30)
-            print(recurrence)
+            if recurrence:
 
-            print("\nRECURSIVE COMPLEXITY")
-            print("-" * 30)
-            print(recursive_complexity)
+                print(
+                    f"  Recurrence : "
+                    f"{recurrence}"
+                )
+
+            if recursive_complexity:
+
+                print(
+                    f"  Complexity : "
+                    f"{recursive_complexity}"
+                )
+
+        if not found_pattern:
+
+            print(
+                "No special algorithm pattern detected."
+            )
 
         # -------------------------
         # FINAL RESULT
