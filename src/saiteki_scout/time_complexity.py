@@ -152,7 +152,12 @@ class Time_Complexity:
         self.binary_search_info = {
     "detected": False
 }   
-        
+        self.two_pointer_info = {
+    "detected": False
+}
+        self.sliding_window_info = {
+    "detected": False
+}
     def detect_binary_search(self, node):
     
         if not isinstance(node, ast.While):
@@ -220,6 +225,117 @@ class Time_Complexity:
         ):
 
             self.binary_search_info[
+                "detected"
+            ] = True
+    def detect_sliding_window(self, node):
+    
+        if not isinstance(node, ast.For):
+            return
+
+        left_moves = False
+
+        for child in ast.walk(node):
+
+            if isinstance(child, ast.AugAssign):
+
+                if (
+                    isinstance(child.target, ast.Name)
+                    and child.target.id == "left"
+                ):
+                    left_moves = True
+
+            if isinstance(child, ast.Assign):
+
+                if (
+                    len(child.targets) == 1
+                    and isinstance(
+                        child.targets[0],
+                        ast.Name
+                    )
+                ):
+
+                    target = child.targets[0].id
+
+                    try:
+
+                        value = ast.unparse(
+                            child.value
+                        )
+
+                        if (
+                            target == "left"
+                            and "left" in value
+                        ):
+                            left_moves = True
+
+                    except:
+                        pass
+
+        if left_moves:
+
+            self.sliding_window_info[
+                "detected"
+            ] = True
+    def detect_two_pointers(self, node):
+    
+        if not isinstance(node, ast.While):
+            return
+
+        left_moves = False
+        right_moves = False
+
+        for child in ast.walk(node):
+
+            if isinstance(child, ast.AugAssign):
+
+                if (
+                    isinstance(child.target, ast.Name)
+                    and child.target.id == "left"
+                ):
+                    left_moves = True
+
+                if (
+                    isinstance(child.target, ast.Name)
+                    and child.target.id == "right"
+                ):
+                    right_moves = True
+
+            if isinstance(child, ast.Assign):
+
+                if (
+                    len(child.targets) == 1
+                    and isinstance(
+                        child.targets[0],
+                        ast.Name
+                    )
+                ):
+
+                    target = child.targets[0].id
+
+                    try:
+
+                        value = ast.unparse(
+                            child.value
+                        )
+
+                        if (
+                            target == "left"
+                            and "left" in value
+                        ):
+                            left_moves = True
+
+                        if (
+                            target == "right"
+                            and "right" in value
+                        ):
+                            right_moves = True
+
+                    except:
+                        pass
+
+        if left_moves and right_moves:
+
+            self.two_pointer_info[
                 "detected"
             ] = True
     def normalize_recurrence(self, recurrence):
@@ -588,7 +704,8 @@ class Time_Complexity:
         # -------------------------
         for node in ast.walk(self.tree):
             self.detect_binary_search(node)
-
+            self.detect_two_pointers(node)
+            self.detect_sliding_window(node)
         # -------------------------
         # BUILD CONTRIBUTION TREE
         # -------------------------
@@ -630,8 +747,16 @@ class Time_Complexity:
         final_complexity = ast_complexity
 
         if self.binary_search_info["detected"]:
-
+    
             final_complexity = "O(log(n))"
+
+        elif self.two_pointer_info["detected"]:
+
+            final_complexity = "O(n)"
+
+        elif self.sliding_window_info["detected"]:
+
+            final_complexity = "O(n)"
 
         elif recursive_complexity:
 
@@ -687,7 +812,20 @@ class Time_Complexity:
             f"Detected : "
             f"{self.recursion_info['detected']}"
         )
+        print("\nTWO POINTER REPORT")
+        print("-" * 30)
 
+        print(
+            f"Detected : "
+            f"{self.two_pointer_info['detected']}"
+        )
+        print("\nSLIDING WINDOW REPORT")
+        print("-" * 30)
+
+        print(
+            f"Detected : "
+            f"{self.sliding_window_info['detected']}"
+        )
         if self.recursion_info["detected"]:
 
             print(
@@ -722,23 +860,19 @@ class Time_Complexity:
 if __name__ == "__main__":
 
     code = """
-def binary_search(arr,target):
-    
-    left = 0
-    right = len(arr)-1
+left = 0
+right = len(arr)-1
 
-    while left <= right:
+while left < right:
 
-        mid = (left+right)//2
+    if arr[left] + arr[right] == target:
+        break
 
-        if arr[mid] == target:
-            return True
+    elif arr[left] + arr[right] < target:
+        left += 1
 
-        elif arr[mid] < target:
-            left = mid+1
-
-        else:
-            right = mid-1
+    else:
+        right -= 1
 """
 
     tc = Time_Complexity(code)
