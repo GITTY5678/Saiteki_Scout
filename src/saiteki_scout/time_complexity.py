@@ -158,6 +158,26 @@ class Time_Complexity:
         self.sliding_window_info = {
     "detected": False
 }
+        self.heap_info = {
+    "detected": False,
+    "operations": []
+}
+        self.dfs_info = {
+    "detected": False
+}
+        self.bfs_info = {
+    "detected": False
+}
+        self.merge_sort_info = {
+    "detected": False
+}
+        self.quick_sort_info = {
+    "detected": False
+}
+        self.dp_info = {
+    "detected": False,
+    "type": None
+}
     def detect_binary_search(self, node):
     
         if not isinstance(node, ast.While):
@@ -227,6 +247,251 @@ class Time_Complexity:
             self.binary_search_info[
                 "detected"
             ] = True
+    def detect_dp(self, node):
+    
+    # DP Array
+        if isinstance(node, ast.Assign):
+
+            try:
+
+                target = ast.unparse(
+                    node.targets[0]
+                )
+
+                if target == "dp":
+
+                    self.dp_info["detected"] = True
+
+                    self.dp_info["type"] = (
+                        "Tabulation"
+                    )
+
+            except:
+                pass
+
+        # Memo Dictionary
+        if isinstance(node, ast.Assign):
+
+            try:
+
+                target = ast.unparse(
+                    node.targets[0]
+                )
+
+                value = ast.unparse(
+                    node.value
+                )
+
+                if (
+                    target == "memo"
+                    and value == "{}"
+                ):
+
+                    self.dp_info["detected"] = True
+
+                    self.dp_info["type"] = (
+                        "Memoization"
+                    )
+
+            except:
+                pass
+    def detect_quick_sort(self, node):
+    
+        if not isinstance(node, ast.FunctionDef):
+            return
+
+        recursive_calls = 0
+
+        has_pivot = False
+
+        for child in ast.walk(node):
+
+            # recursive calls
+            if (
+                isinstance(child, ast.Call)
+                and isinstance(child.func, ast.Name)
+                and child.func.id == node.name
+            ):
+                recursive_calls += 1
+
+            # pivot variable
+            if isinstance(child, ast.Assign):
+
+                try:
+
+                    for target in child.targets:
+
+                        if (
+                            isinstance(target, ast.Name)
+                            and target.id == "pivot"
+                        ):
+                            has_pivot = True
+
+                except:
+                    pass
+
+        if (
+            recursive_calls == 2
+            and has_pivot
+        ):
+
+            self.quick_sort_info[
+                "detected"
+            ] = True
+    def detect_merge_sort(self, node):
+    
+        if not isinstance(node, ast.FunctionDef):
+            return
+
+        recursive_calls = 0
+
+        has_mid = False
+
+        has_slice = False
+
+        for child in ast.walk(node):
+
+            # recursive calls
+            if (
+                isinstance(child, ast.Call)
+                and isinstance(child.func, ast.Name)
+                and child.func.id == node.name
+            ):
+                recursive_calls += 1
+
+            # mid variable
+            if isinstance(child, ast.Assign):
+
+                try:
+
+                    for target in child.targets:
+
+                        if (
+                            isinstance(target, ast.Name)
+                            and target.id == "mid"
+                        ):
+                            has_mid = True
+
+                except:
+                    pass
+
+            # arr[:mid]
+            if isinstance(child, ast.Slice):
+
+                has_slice = True
+
+        if (
+            recursive_calls == 2
+            and has_mid
+            and has_slice
+        ):
+
+            self.merge_sort_info[
+                "detected"
+            ] = True
+    def detect_dfs(self, node):
+    
+        if not isinstance(node, ast.FunctionDef):
+            return
+
+        function_name = node.name
+
+        recursive_call = False
+
+        graph_traversal = False
+
+        for child in ast.walk(node):
+
+            if (
+                isinstance(child, ast.Call)
+                and isinstance(child.func, ast.Name)
+                and child.func.id == function_name
+            ):
+                recursive_call = True
+
+            if isinstance(child, ast.For):
+
+                try:
+
+                    iterator = ast.unparse(
+                        child.iter
+                    )
+
+                    if "[" in iterator:
+                        graph_traversal = True
+
+                except:
+                    pass
+
+        if recursive_call and graph_traversal:
+
+            self.dfs_info["detected"] = True
+    def detect_bfs(self, node):
+    
+        if not isinstance(node, ast.While):
+            return
+
+        found_popleft = False
+
+        found_append = False
+
+        for child in ast.walk(node):
+
+            if isinstance(child, ast.Call):
+
+                try:
+
+                    func = ast.unparse(
+                        child.func
+                    )
+
+                    if ".popleft" in func:
+                        found_popleft = True
+
+                    if ".append" in func:
+                        found_append = True
+
+                except:
+                    pass
+
+        if found_popleft and found_append:
+
+            self.bfs_info["detected"] = True
+    def detect_heap(self, node):
+    
+        if not isinstance(node, ast.Call):
+            return
+
+        try:
+
+            func_name = ast.unparse(node.func)
+
+        except:
+            return
+
+        heap_operations = {
+
+            "heapq.heappush": "O(log n)",
+
+            "heapq.heappop": "O(log n)",
+
+            "heapq.heapreplace": "O(log n)",
+
+            "heapq.heappushpop": "O(log n)",
+
+            "heapq.heapify": "O(n)"
+        }
+
+        if func_name in heap_operations:
+
+            self.heap_info["detected"] = True
+
+            self.heap_info["operations"].append(
+                (
+                    func_name,
+                    heap_operations[func_name]
+                )
+            )
     def detect_sliding_window(self, node):
     
         if not isinstance(node, ast.For):
@@ -703,9 +968,22 @@ class Time_Complexity:
         # DETECT BINARY SEARCH
         # -------------------------
         for node in ast.walk(self.tree):
+    
             self.detect_binary_search(node)
+
             self.detect_two_pointers(node)
+
             self.detect_sliding_window(node)
+
+            self.detect_heap(node)
+
+            self.detect_bfs(node)
+
+            self.detect_dfs(node)
+
+            self.detect_merge_sort(node)
+            self.detect_quick_sort(node)
+            self.detect_dp(node)
         # -------------------------
         # BUILD CONTRIBUTION TREE
         # -------------------------
@@ -747,7 +1025,7 @@ class Time_Complexity:
         final_complexity = ast_complexity
 
         if self.binary_search_info["detected"]:
-    
+        
             final_complexity = "O(log(n))"
 
         elif self.two_pointer_info["detected"]:
@@ -757,7 +1035,37 @@ class Time_Complexity:
         elif self.sliding_window_info["detected"]:
 
             final_complexity = "O(n)"
+        elif self.heap_info["detected"]:
+    
+            complexities = [
+                complexity
+                for _, complexity
+                in self.heap_info["operations"]
+            ]
 
+            if "O(n)" in complexities:
+                final_complexity = "O(n)"
+            else:
+                final_complexity = "O(log n)"
+        elif self.bfs_info["detected"]:
+    
+            final_complexity = "O(V+E)"
+
+        elif self.dfs_info["detected"]:
+
+            final_complexity = "O(V+E)"
+        elif self.merge_sort_info["detected"]:
+    
+            final_complexity = "O(n*log(n))"
+        elif self.quick_sort_info["detected"]:
+    
+            final_complexity = (
+                "Average: O(n*log(n)), "
+                "Worst: O(n**2)"
+            )
+        elif self.dp_info["detected"]:
+    
+            final_complexity = "O(n)"
         elif recursive_complexity:
 
             final_complexity = recursive_complexity
@@ -826,6 +1134,67 @@ class Time_Complexity:
             f"Detected : "
             f"{self.sliding_window_info['detected']}"
         )
+        print("\nHEAP REPORT")
+        print("-" * 30)
+
+        print(
+            f"Detected : "
+            f"{self.heap_info['detected']}"
+        )
+        print("\nDFS REPORT")
+        print("-" * 30)
+
+        print(
+            f"Detected : "
+            f"{self.dfs_info['detected']}"
+        )
+
+        print("\nBFS REPORT")
+        print("-" * 30)
+
+        print(
+            f"Detected : "
+            f"{self.bfs_info['detected']}"
+)
+        print("\nMERGE SORT REPORT")
+        print("-" * 30)
+
+        print(
+            f"Detected : "
+            f"{self.merge_sort_info['detected']}"
+        )
+        print("\nQUICK SORT REPORT")
+        print("-" * 30)
+
+        print(
+            f"Detected : "
+            f"{self.quick_sort_info['detected']}"
+)
+        print("\nDYNAMIC PROGRAMMING REPORT")
+        print("-" * 30)
+
+        print(
+            f"Detected : "
+            f"{self.dp_info['detected']}"
+        )
+
+        if self.dp_info["detected"]:
+
+            print(
+                f"Type : "
+                f"{self.dp_info['type']}"
+            )
+        if self.heap_info["detected"]:
+
+            print("\nOPERATIONS")
+
+            for op, complexity in (
+                self.heap_info["operations"]
+            ):
+
+                print(
+                    f"{op} -> {complexity}"
+                )
         if self.recursion_info["detected"]:
 
             print(
@@ -860,19 +1229,15 @@ class Time_Complexity:
 if __name__ == "__main__":
 
     code = """
-left = 0
-right = len(arr)-1
+def dfs(node):
+    
+    visited.add(node)
 
-while left < right:
+    for neighbor in graph[node]:
 
-    if arr[left] + arr[right] == target:
-        break
+        if neighbor not in visited:
 
-    elif arr[left] + arr[right] < target:
-        left += 1
-
-    else:
-        right -= 1
+            dfs(neighbor)
 """
 
     tc = Time_Complexity(code)
