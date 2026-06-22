@@ -284,6 +284,9 @@ class Time_Complexity:
     "detected": False,
     "type": None
 }
+        self.insertion_sort_info = {
+    "detected": False
+}
     def detect_binary_search(self, node):
     
         if not isinstance(node, ast.While):
@@ -353,6 +356,49 @@ class Time_Complexity:
             self.binary_search_info[
                 "detected"
             ] = True
+    def detect_insertion_sort(self, node):
+    
+        if not isinstance(node, ast.For):
+            return
+
+        has_while = False
+        has_decrement = False
+
+        for child in ast.walk(node):
+
+            if isinstance(child, ast.While):
+                has_while = True
+
+                for grandchild in ast.walk(child):
+
+                    if isinstance(grandchild, ast.AugAssign):
+
+                        if (
+                            isinstance(grandchild.op, ast.Sub)
+                            and isinstance(
+                                grandchild.target,
+                                ast.Name
+                            )
+                        ):
+                            has_decrement = True
+
+                    elif isinstance(grandchild, ast.Assign):
+
+                        try:
+
+                            text = ast.unparse(
+                                grandchild.value
+                            )
+
+                            if "-" in text:
+                                has_decrement = True
+
+                        except:
+                            pass
+
+        if has_while and has_decrement:
+
+            self.insertion_sort_info["detected"] = True
     def detect_dp(self, node):
     
     # DP Array
@@ -1085,8 +1131,12 @@ class Time_Complexity:
             self.detect_dfs(node)
 
             self.detect_merge_sort(node)
+
             self.detect_quick_sort(node)
+
             self.detect_dp(node)
+
+            self.detect_insertion_sort(node)
         # -------------------------
         # BUILD CONTRIBUTION TREE
         # -------------------------
@@ -1169,6 +1219,9 @@ class Time_Complexity:
         elif self.dp_info["detected"]:
     
             final_complexity = "O(n)"
+        elif self.insertion_sort_info["detected"]:
+    
+            final_complexity = "O(n²)"
         elif recursive_complexity:
 
             final_complexity = recursive_complexity
@@ -1238,7 +1291,11 @@ class Time_Complexity:
         print("-" * 30)
 
         found_pattern = False
-
+        if self.insertion_sort_info["detected"]:
+    
+            print(
+                "Insertion Sort"
+            )
         if self.binary_search_info["detected"]:
 
             found_pattern = True
@@ -1473,14 +1530,3 @@ class Time_Complexity:
         plt.grid(True)
 
         plt.show()
-if __name__ == "__main__":
-
-    code = """
-arr = sorted(arr)
-
-print(len(arr))
-"""
-
-    tc = Time_Complexity(code)
-    tc.analyzer()
-    tc.classifier()

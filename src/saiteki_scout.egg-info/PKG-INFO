@@ -1,5 +1,29 @@
 Metadata-Version: 2.4
-Name: saiteki_scout
-Version: 0.0.0
+Name: saiteki-scout
+Version: 1.0.1
+Summary: Static Time and Space Complexity Analyzer for Python
+Author: Harihara Suthan S
+License: MIT
+Project-URL: Homepage, https://github.com/YOUR_USERNAME/Saiteki_Scout
+Project-URL: Issues, https://github.com/YOUR_USERNAME/Saiteki_Scout/issues
+Keywords: complexity-analysis,time-complexity,space-complexity,algorithm-analysis,ast,python
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Education
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
 License-File: LICENSE
+Requires-Dist: sympy>=1.12
+Requires-Dist: matplotlib>=3.8
 Dynamic: license-file
+
+# Saiteki_Scout
