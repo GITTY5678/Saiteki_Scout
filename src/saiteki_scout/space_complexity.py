@@ -2,6 +2,29 @@ import ast
 from sympy import symbols
 
 class Space_Complexity:
+    """
+    Static space complexity analyzer for Python source code.
+
+    This class parses Python code into an Abstract Syntax Tree
+    (AST) and estimates memory growth by analyzing container
+    allocations and comprehension constructs.
+
+    Supported structures include:
+
+    - List
+    - ListComprehension
+    - Dictionary
+    - DictionaryComprehension
+    - Set
+    - SetComprehension
+    - Tuple
+    - GeneratorExpression
+
+    Examples
+    --------
+    >>> sc = Space_Complexity(code)
+    >>> sc.analyzer()
+        """
     SPACE_CONTRIBUTORS = {
 
     "List": "O(n)",
@@ -104,7 +127,57 @@ class Space_Complexity:
             for item in self.space_contributions
         )
     def analyzer(self):
-    
+        """
+    Analyze the supplied Python source code and determine
+    its overall space complexity.
+
+    This method performs the complete space analysis pipeline:
+
+    1. Parse source code into an AST.
+    2. Traverse all AST nodes.
+    3. Detect memory-allocating structures such as:
+       - Lists
+       - List Comprehensions
+       - Dictionaries
+       - Dictionary Comprehensions
+       - Sets
+       - Set Comprehensions
+       - Tuples
+       - Generator Expressions
+    4. Estimate the space contribution of each structure.
+    5. Identify the dominant space term.
+    6. Produce a space complexity report.
+
+    Outputs
+    -------
+    Space Contributions:
+        Individual memory allocations detected in the code.
+
+    Space Complexity:
+        Estimated asymptotic space complexity.
+
+    Notes
+    -----
+    The analysis is static and based on AST inspection.
+    Actual runtime memory usage may differ depending on
+    interpreter behavior and input characteristics.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> code = '''
+    ... arr = [i for i in range(n)]
+    ... '''
+    >>> sc = Space_Complexity(code)
+    >>> sc.analyzer()
+
+    SPACE COMPLEXITY
+    ----------------
+    O(n)
+    """
         self.tree = ast.parse(
             self.code
         )

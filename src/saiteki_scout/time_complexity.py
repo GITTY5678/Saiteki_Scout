@@ -3,7 +3,61 @@ from sympy import symbols, log, simplify, Add, Mul,sympify
 
 
 class Time_Complexity:
+    """
+    Static time complexity analyzer for Python source code.
 
+    This class parses Python code into an Abstract Syntax Tree
+    (AST), identifies complexity-contributing operations,
+    constructs symbolic complexity expressions, and estimates
+    the overall asymptotic time complexity of the program.
+
+    Features
+    --------
+    - AST-based complexity analysis
+    - Symbolic complexity reduction using SymPy
+    - Dominant term extraction
+    - Human-readable complexity reports
+    - Algorithm pattern detection:
+        * Recursion
+        * Binary Search
+        * Two Pointers
+        * Sliding Window
+        * Heap Operations
+        * Breadth First Search (BFS)
+        * Depth First Search (DFS)
+        * Merge Sort
+        * Quick Sort
+        * Dynamic Programming
+        * Insertion Sort
+    - Best, Average, and Worst-case classification
+    - Complexity graph generation
+
+    Notes
+    -----
+    This analyzer performs static analysis and estimates
+    theoretical asymptotic complexity. Actual runtime
+    performance may vary depending on input data,
+    implementation details, and Python interpreter behavior.
+
+    Examples
+    --------
+    >>> code = '''
+    ... for i in range(n):
+    ...     print(i)
+    ... '''
+
+    >>> tc = Time_Complexity(code)
+
+    >>> tc.analyzer()
+
+    FINAL COMPLEXITY
+    ----------------
+    O(n)
+
+    >>> tc.classifier()
+
+    >>> tc.graph()
+    """
     TIME_CONTRIBUTORS = {
         # Loops
         "For": ["iter"],
@@ -1102,7 +1156,69 @@ class Time_Complexity:
         )
     
     def analyzer(self):
-    
+        """
+    Analyze the supplied Python source code and determine its
+    overall time complexity.
+
+    This method performs the complete analysis pipeline:
+
+    1. Parse source code into an AST.
+    2. Detect known algorithmic patterns:
+       - Recursion
+       - Binary Search
+       - Two Pointers
+       - Sliding Window
+       - Heap Operations
+       - BFS
+       - DFS
+       - Merge Sort
+       - Quick Sort
+       - Dynamic Programming
+       - Insertion Sort
+    3. Build a complexity contribution tree.
+    4. Generate symbolic complexity expressions using SymPy.
+    5. Simplify expressions and extract dominant terms.
+    6. Apply algorithm-specific complexity overrides when
+       pattern detection is more accurate than AST estimation.
+    7. Produce a detailed complexity report.
+
+    Outputs
+    -------
+    Contributions:
+        Human-readable complexity contributors.
+
+    Basic Expression:
+        Raw symbolic complexity expression.
+
+    Simplified Expression:
+        SymPy-simplified expression.
+
+    Dominant Term:
+        Highest-order term of the complexity expression.
+
+    Detected Patterns:
+        Recognized algorithmic techniques.
+
+    Final Complexity:
+        Estimated asymptotic time complexity.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> code = '''
+    ... for i in range(n):
+    ...     print(i)
+    ... '''
+    >>> tc = Time_Complexity(code)
+    >>> tc.analyzer()
+
+    FINAL COMPLEXITY
+    ----------------
+    O(n)
+    """
         # -------------------------
         # PARSE
         # -------------------------
@@ -1478,7 +1594,46 @@ class Time_Complexity:
             f"Worst Case : {info['worst']}"
         )
     def graph(self):
-    
+        """
+    Generate a visualization of the estimated time complexity.
+
+    The method first analyzes the source code to determine
+    its asymptotic time complexity and then plots the
+    corresponding growth curve using Matplotlib.
+
+    Supported complexity classes include:
+
+    - O(1)
+    - O(log n)
+    - O(n)
+    - O(n log n)
+    - O(n²)
+    - O(n³)
+    - O(2ⁿ)
+
+    The generated graph illustrates how the algorithm's
+    execution cost grows as the input size increases.
+
+    Notes
+    -----
+    The graph is based on theoretical complexity estimates
+    and does not represent actual runtime measurements.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> code = '''
+    ... for i in range(n):
+    ...     print(i)
+    ... '''
+    >>> tc = Time_Complexity(code)
+    >>> tc.graph()
+
+    Displays a graph corresponding to O(n).
+    """
         import math
         import matplotlib.pyplot as plt
 
