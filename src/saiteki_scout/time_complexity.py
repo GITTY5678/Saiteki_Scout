@@ -1,6 +1,6 @@
 import ast
 from sympy import symbols, log, simplify, Add, Mul,sympify
-
+from .language_detector import LanguageDetector
 
 class Time_Complexity:
     """
@@ -289,6 +289,15 @@ class Time_Complexity:
     "O(2**n)": lambda n: 2**n
 }
     def __init__(self, code):
+        
+
+        language = LanguageDetector.detect(code)
+        if language == "python":
+            pass
+        elif language == "java":
+            raise NotImplementedError(
+                "Java parser is under development."
+            )
         self.code = code
         self.tree = None
 
